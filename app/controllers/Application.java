@@ -33,18 +33,21 @@ public class Application extends Controller {
         ObjectNode result = Json.newObject();
         JsonNode json = request().body().asJson();
         System.out.println("Input to register method :" + json.toString());
-        String emailId = json.findPath("emailId").textValue().trim();
-        String passwd = json.findPath("password").textValue().trim();
+
+        String emailId = json.findPath("emailId").textValue();
+        String passwd = json.findPath("password").textValue();
 
 
-        if ("".equals(emailId)) {
-            result.put("Error Message", "Please enter email first");
+        if (emailId == null || "".equals(emailId.trim())) {
+            result.put("Error Message", "Please enter your email");
             return badRequest(result);
         }
-        if ("".equals(passwd)) {
+        if (passwd == null || "".equals(passwd.trim())) {
             result.put("Error Message", "Please enter your password");
             return badRequest(result);
         }
+        emailId = emailId.trim();
+        passwd = passwd.trim();
 
         Users user = null;
         user = Users.findByEmail(emailId);
@@ -71,34 +74,39 @@ public class Application extends Controller {
         ObjectNode result = Json.newObject();
         JsonNode json = request().body().asJson();
         System.out.println("Input to login method :" + json.toString());
-        String emailId = json.findPath("emailId").textValue().trim();
-        String passwd = json.findPath("password").textValue().trim();
+        String emailId = json.findPath("emailId").textValue();
+        String passwd = json.findPath("password").textValue();
 
-        if ("".equals(emailId)) {
+        if (emailId == null || "".equals(emailId.trim())) {
             result.put("Error Message", "Please enter email first");
             return badRequest(result);
         }
-        if ("".equals(passwd)) {
+        if (passwd == null || "".equals(passwd.trim())) {
             result.put("Error Message", "Please enter your password");
             return badRequest(result);
         }
-        String password = Encryption.calculateHash(passwd);
+        emailId = emailId.trim();
+        passwd = passwd.trim();
+
         Users user = Users.findByEmail(emailId);
-        String passwordDatabase = user.getPassword();
 
-        if (user != null) {
-            if (password.equals(passwordDatabase)) {
-                result.put("Success", user.getEmailId());
-                return ok(result);
-            } else {
-                return unauthorized("Unauthorised Access", "Please enter correct credentials");
-            }
-
-        } else {
+        if (user == null) {
             result.put("Error Message", "Please register yourself");
             return unauthorized(result);
+        } else {
+            String passwordDatabase = user.getPassword();
+            if (Encryption.matchHash(passwd, passwordDatabase)) {
+                result.put("Success", user.getEmailId());
+                result.put("Details", "You can view your details and update your profile");
+                return ok(result);
+            } else {
+                result.put("Unauthorised Access", "Please enter correct credentials");
+                return unauthorized(result);
+            }
+
         }
     }
+
 
     @Security.Authenticated(Secured.class)
     @BodyParser.Of(BodyParser.Json.class)
@@ -106,18 +114,30 @@ public class Application extends Controller {
         ObjectNode result = Json.newObject();
         JsonNode json = request().body().asJson();
         System.out.println("Input to update method :" + json.toString());
+
         Users user = Users.findByAuthToken(request().getHeader("AUTH_TOKEN"));
-        String fname = json.findPath("firstName").textValue().trim();
-        String lname = json.findPath("lastName").textValue().trim();
-        String gender = json.findPath("gender").textValue().trim();
-        String dob = json.findPath("DOB").textValue().trim();
+        String fname = json.findPath("firstName").textValue();
+        String lname = json.findPath("lastName").textValue();
+        String gender = json.findPath("gender").textValue();
+        String dob = json.findPath("DOB").textValue();
         Date DOB = null;
         DOB = sdf.parse(dob);
         System.out.println("DOB is" + DOB.toString());
-        if ("".equals(fname) || "".equals(lname) || "".equals(gender) || "".equals(dob)) {
+        if (fname == null || "".equals(fname.trim()) || lname == null || "".equals(lname.trim()) || gender == null
+                || "".equals(gender.trim()) || dob == null || "".equals(dob.trim())) {
             result.put("ErrorMessage", "Please give all the details.Recheck again");
             return badRequest(result);
         }
+        fname = fname.trim();
+        lname = lname.trim();
+        gender = gender.trim();
+        dob = dob.trim();
+
+        if (!(gender.equalsIgnoreCase("M") || gender.equalsIgnoreCase("F"))) {
+            result.put("ErrorMessage", "Please specify gender as m/f only");
+            return badRequest(result);
+        }
+
         UsersProfile usersProfile = UsersProfile.findByUser(user);
         usersProfile.setUser(user);
         usersProfile.setFirstName(fname);
@@ -125,12 +145,24 @@ public class Application extends Controller {
         usersProfile.setGender(gender);
         usersProfile.setDOB(DOB);
         Ebean.update(usersProfile);
+
         System.out.println("User_Profile firstname is " + usersProfile.getFirstName());
+
         result.put("SuccessMessage", "Congrats!!!! your profile has been updated");
         return ok(result);
     }
+
+
     @Security.Authenticated(Secured.class)
-    public static Result view(){
+    public static Result view() {
+        ObjectNode result = Json.newObject();
+        Users user = Users.findByAuthToken(request().getHeader("AUTH_TOKEN"));
+        UsersProfile usersProfile = UsersProfile.findByUser(user);
+        result.put("firstName", usersProfile.getFirstName());
+        result.put("lastName", usersProfile.getLastName());
+        result.put("gender", usersProfile.getGender());
+        result.put("DOB", sdf.format(usersProfile.getDOB()));
+        return ok(result);
 
     }
 
