@@ -1,19 +1,35 @@
 package model;
 
+import com.avaje.ebean.Model;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.List;
 
-/**
- * Created by zemoso014 on 27/10/15.
- */
+
+
+@Entity
+@Table(name = "UserProfile")
 public class UsersProfile {
 
+    @Id
+    @Column(name = "user_profile_id")
     private long id;
+    @Column(name = "FirstName")
     private String firstName;
+    @Column(name = "LastName")
     private String lastName;
+    @Column(name = "DOB")
     private Date DOB;
+    @Column(name = "Gender")
     private String gender;
+    @Column(name = "Current_Timestamp")
     private Timestamp createdTstamp;
+    @Column(name = "Updated_Timestamp")
     private Timestamp lastUpdatedTstamp;
 
     public long getId() {
@@ -54,6 +70,25 @@ public class UsersProfile {
 
     public void setGender(String gender) {
         this.gender = gender;
+    }
+
+    public static Model.Finder<Long, UsersProfile> find = new Model.Finder<Long, UsersProfile>(Long.class,
+            UsersProfile.class);
+
+    public static UsersProfile findByFirstName(String fn) {
+        return find.where().eq("FirstName", fn).findUnique();
+    }
+
+    public static UsersProfile findByLastName(String ln) {
+        return find.where().eq("LastName", ln).findUnique();
+    }
+
+    public static UsersProfile findById(Long id) {
+        return find.where().eq("user_profile_id", id).findUnique();
+    }
+
+    public static List<UsersProfile> findByGender(String g) {
+        return find.where().eq("Gender", g).findList();
     }
 
 }
