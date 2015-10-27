@@ -2,14 +2,10 @@ package model;
 
 import com.avaje.ebean.Model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import java.sql.Timestamp;
+import javax.persistence.*;
+import java.security.Timestamp;
 import java.util.Date;
 import java.util.List;
-
 
 
 @Entity
@@ -17,8 +13,10 @@ import java.util.List;
 public class UsersProfile {
 
     @Id
-    @Column(name = "user_profile_id")
-    private long id;
+    private long Id;
+    @OneToOne
+    @JoinColumn(name = "Users_Id")
+    private Users user;
     @Column(name = "FirstName")
     private String firstName;
     @Column(name = "LastName")
@@ -33,7 +31,7 @@ public class UsersProfile {
     private Timestamp lastUpdatedTstamp;
 
     public long getId() {
-        return id;
+        return Id;
     }
 
     public String getFirstName() {
@@ -53,7 +51,7 @@ public class UsersProfile {
     }
 
     public void setId(long id) {
-        this.id = id;
+        this.Id = id;
     }
 
     public void setFirstName(String firstName) {
@@ -84,11 +82,23 @@ public class UsersProfile {
     }
 
     public static UsersProfile findById(Long id) {
-        return find.where().eq("user_profile_id", id).findUnique();
+        return find.where().eq("Id", id).findUnique();
     }
 
     public static List<UsersProfile> findByGender(String g) {
         return find.where().eq("Gender", g).findList();
     }
 
+    public static UsersProfile findByUser(Users user) {
+        return find.where().eq("Users_Id", user.getId()).findUnique();
+    }
+
+
+    public Users getUser() {
+        return user;
+    }
+
+    public void setUser(Users user) {
+        this.user = user;
+    }
 }

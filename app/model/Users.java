@@ -8,15 +8,14 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.sql.Timestamp;
+import java.security.Timestamp;
 
 
 @Entity
 @Table(name = "Users")
 public class Users {
-
-    @Column(name = "Id")
     @Id
+    @Column(name = "Id")
     private Long id;
 
     @Column(name = "EmailID")
