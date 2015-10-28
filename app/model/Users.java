@@ -4,10 +4,7 @@ import com.avaje.ebean.Model;
 import com.avaje.ebean.annotation.CreatedTimestamp;
 import com.avaje.ebean.annotation.UpdatedTimestamp;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.security.Timestamp;
 
 
@@ -17,7 +14,8 @@ public class Users {
     @Id
     @Column(name = "Id")
     private Long id;
-
+    @OneToOne(mappedBy = "user",cascade = CascadeType.ALL)
+    private UsersProfile usersProfile;
     @Column(name = "EmailID")
     private String emailId;
     @Column(name = "Password")
@@ -83,6 +81,14 @@ public class Users {
 
     public void setLastUpdatedTstamp(Timestamp lastUpdatedTstamp) {
         this.lastUpdatedTstamp = lastUpdatedTstamp;
+    }
+
+    public UsersProfile getUsersProfile() {
+        return usersProfile;
+    }
+
+    public void setUsersProfile(UsersProfile usersProfile) {
+        this.usersProfile = usersProfile;
     }
 
     public static Model.Finder<Long, Users> find = new Model.Finder<Long, Users>(Long.class,

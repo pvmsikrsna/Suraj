@@ -61,10 +61,11 @@ public class Application extends Controller {
         user.setEmailId(emailId);
         user.setPassword(password);
         user.setAuth_token(authToken);
-        Ebean.save(user);
         UsersProfile usersProfile = new UsersProfile();
+        user.setUsersProfile(usersProfile);
         usersProfile.setUser(user);
-        Ebean.save(usersProfile);
+        Ebean.save(user);
+//        Ebean.save(usersProfile);
         result.put("Success Message", "your registration was successfull");
         return ok(result);
     }
@@ -110,7 +111,7 @@ public class Application extends Controller {
 
     @Security.Authenticated(Secured.class)
     @BodyParser.Of(BodyParser.Json.class)
-    public static Result update() throws ParseException {
+    public static Result updateProfile() throws ParseException {
         ObjectNode result = Json.newObject();
         JsonNode json = request().body().asJson();
         System.out.println("Input to update method :" + json.toString());
@@ -154,10 +155,11 @@ public class Application extends Controller {
 
 
     @Security.Authenticated(Secured.class)
-    public static Result view() {
+    public static Result viewProfile() {
         ObjectNode result = Json.newObject();
         Users user = Users.findByAuthToken(request().getHeader("AUTH_TOKEN"));
-        UsersProfile usersProfile = UsersProfile.findByUser(user);
+//        UsersProfile usersProfile = UsersProfile.findByUser(user);
+        UsersProfile usersProfile = user.getUsersProfile();
         result.put("firstName", usersProfile.getFirstName());
         result.put("lastName", usersProfile.getLastName());
         result.put("gender", usersProfile.getGender());

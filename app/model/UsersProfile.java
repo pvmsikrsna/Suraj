@@ -14,7 +14,7 @@ public class UsersProfile {
 
     @Id
     private long Id;
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "Users_Id")
     private Users user;
     @Column(name = "FirstName")
